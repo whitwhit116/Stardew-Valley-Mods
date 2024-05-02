@@ -49,49 +49,19 @@ namespace Shockah.Hibernation
 		{
 			var harmony = new Harmony(ModManifest.UniqueID);
 
-			harmony.TryPatch(
-				monitor: Monitor,
-				original: () => AccessTools.Method(typeof(GameLocation), nameof(GameLocation.performTouchAction)),
-				prefix: new HarmonyMethod(typeof(Hibernation), nameof(GameLocation_performTouchAction_Prefix)),
-				postfix: new HarmonyMethod(typeof(Hibernation), nameof(GameLocation_performTouchAction_Postfix))
-			);
+			  var originalMethod = AccessTools.Method(typeof(GameLocation), "performTouchAction", new Type[] { typeof(string), typeof(Vector2) });
 
-			harmony.TryPatch(
-				monitor: Monitor,
-				original: () => AccessTools.Method(typeof(GameLocation), nameof(GameLocation.createYesNoResponses)),
-				postfix: new HarmonyMethod(typeof(Hibernation), nameof(GameLocation_createYesNoResponses_Postfix))
-			);
-
-			harmony.TryPatch(
-				monitor: Monitor,
-				original: () => AccessTools.Method(typeof(GameLocation), nameof(GameLocation.answerDialogueAction)),
-				postfix: new HarmonyMethod(typeof(Hibernation), nameof(GameLocation_answerDialogueAction_Postfix))
-			);
-
-			harmony.TryPatch(
-				monitor: Monitor,
-				original: () => AccessTools.Method(typeof(Game1), "_newDayAfterFade"),
-				postfix: new HarmonyMethod(typeof(Hibernation), nameof(Game1__newDayAfterFade_Postfix))
-			);
-
-			harmony.TryPatchVirtual(
-				monitor: Monitor,
-				original: () => AccessTools.Method(typeof(Game1), "_draw"),
-				postfix: new HarmonyMethod(typeof(Hibernation), nameof(Game1__draw_Postfix))
-			);
-
-			harmony.TryPatchVirtual(
-				monitor: Monitor,
-				original: () => AccessTools.Method(typeof(ModHooks), nameof(ModHooks.OnGame1_ShowEndOfNightStuff)),
-				postfix: new HarmonyMethod(typeof(Hibernation), nameof(ModHooks_OnGame1_ShowEndOfNightStuff_Postfix))
-			);
-
-			harmony.TryPatchVirtual(
-				monitor: Monitor,
-				original: () => AccessTools.Method(typeof(FarmEvent), nameof(FarmEvent.setUp)),
-				postfix: new HarmonyMethod(typeof(Hibernation), nameof(FarmEvent_setUp_Postfix))
-			);
-		}
+      if (originalMethod != null)
+      {
+        harmony.Patch(
+            originalMethod,
+            new HarmonyMethod(typeof(Hibernation), nameof(GameLocation_performTouchAction_Prefix)),
+            new HarmonyMethod(typeof(Hibernation), nameof(GameLocation_performTouchAction_Postfix))
+        );
+      }
+      else
+      {
+        Monitor.Log("Failed to find the method to patch.", LogLevel.Error);
 
 		private void OnSaveLoaded(object? sender, SaveLoadedEventArgs e)
 		{
